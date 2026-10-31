@@ -111,6 +111,32 @@ th,td{padding:6px 5px;text-align:right;border-bottom:1px solid var(--line);font-
 th:first-child,td:first-child{text-align:left}
 th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .fine{font-size:12px;color:var(--muted);margin:12px 0 0}
+.tabs{gap:0}
+.tabs button{padding:12px 9px 10px}
+.who{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.who button{display:flex;gap:6px;align-items:center;background:var(--surface2);border:1px solid transparent;border-radius:99px;padding:3px 10px 3px 3px;cursor:pointer;font-weight:500}
+.who button.on{border-color:var(--accent);font-weight:700}
+.who .av{width:24px;height:24px;font-size:12px}
+.chead{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.chead b{display:block}
+.chead small{color:var(--muted)}
+.msgs{display:flex;flex-direction:column;gap:8px;max-height:360px;min-height:160px;overflow-y:auto;padding:4px 2px 8px}
+.m{max-width:90%;padding:8px 11px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.m.bot{background:var(--surface2);align-self:flex-start;border-bottom-left-radius:4px}
+.m.me{background:var(--accent);color:var(--accent-fg);align-self:flex-end;border-bottom-right-radius:4px}
+.m.wait{color:var(--muted)}
+.sugs{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+.sugs button{background:none;border:1px solid var(--line);border-radius:99px;padding:5px 11px;cursor:pointer;text-align:left}
+.sugs button:hover{border-color:var(--accent)}
+.cform{display:flex;gap:6px}
+.cform input{flex:1;min-width:0}
+.cerr{color:var(--danger);font-size:12px;margin:6px 0 0}
+.skills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.sk{border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600}
+.sk.ia{border-color:var(--accent)}
+.more{margin-top:8px;font-size:13px}
+.more summary{cursor:pointer;color:var(--muted);font-weight:600}
+.more p{margin:6px 0;color:var(--muted)}
 </style>
 
 <div class="app">
@@ -150,10 +176,12 @@ th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted
         <button role="tab" id="t-team" aria-selected="true" aria-controls="p-team">Equipe</button>
         <button role="tab" id="t-log" aria-selected="false" aria-controls="p-log">Avisos</button>
         <button role="tab" id="t-rep" aria-selected="false" aria-controls="p-rep">Relatório</button>
+        <button role="tab" id="t-chat" aria-selected="false" aria-controls="p-chat">Conversa</button>
       </div>
       <div id="p-team" role="tabpanel" aria-labelledby="t-team"></div>
       <div id="p-log" role="tabpanel" aria-labelledby="t-log" hidden></div>
       <div id="p-rep" role="tabpanel" aria-labelledby="t-rep" hidden></div>
+      <div id="p-chat" role="tabpanel" aria-labelledby="t-chat" hidden></div>
     </aside>
   </main>
 </div>
@@ -162,7 +190,7 @@ th{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted
 (function(){
 'use strict';
 var LW=880,LH=580,UNIT=34,W=14,H=12,OX=412,OY=130;
-var STORE='rua9-escritorio-v1';
+var STORE='rua9-escritorio-v2';
 var RM=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 var $=function(s){return document.querySelector(s)};
 var FONT='"DM Sans",Arial,sans-serif';
@@ -175,13 +203,43 @@ var STATUS={
   fora:{label:'Fora',color:'#8b94a3'}
 };
 var CATALOG=[
-  {id:'lia',name:'Lia',role:'Direção Criativa',desc:'Conduz o diagnóstico criativo, define a ideia central e cuida da linguagem de cada projeto.'},
-  {id:'theo',name:'Theo',role:'Direção de Cena',desc:'Dirige no set: enquadramento, atuação e ritmo de cada take.'},
-  {id:'nina',name:'Nina',role:'Captação',desc:'Câmera, luz e som. Monta o set e garante a imagem.'},
-  {id:'caio',name:'Caio',role:'Montagem e Finalização',desc:'Edita, corrige a cor e entrega nos formatos 16:9 e 9:16.'},
-  {id:'rafa',name:'Rafa',role:'Atendimento Comercial',desc:'Responde contatos em minutos, explica os pacotes Essencial, Performance e Autoridade Total e agenda o diagnóstico.'},
-  {id:'bia',name:'Bia',role:'Roteiro',desc:'Escreve manifestos de marca, roteiros de séries e chamadas para redes.'}
+  {id:'rafa',name:'Rafa',role:'Atendimento Comercial',desc:'Responde contatos em minutos, explica os pacotes Essencial, Performance e Autoridade Total e agenda o diagnóstico.',
+   skill:{name:'Triagem de leads',how:'Classifica cada contato em quente, morno ou frio pelo objetivo, prazo e adequação à Rua 9, faz uma pergunta por vez e fecha toda conversa com um próximo passo claro: o diagnóstico criativo.'},
+   ia:{short:'IA: resumo e follow-up',how:'Usa IA para resumir cada conversa em um briefing para a Diretora Criativa, sugerir a melhor próxima pergunta e redigir follow-ups no tom da Rua 9.'},
+   brief:'Vendas consultivas de serviços criativos: descobrir objetivo, público e momento da marca antes de falar de preço; lidar com objeções comuns (preço, prazo, "já tenho um celular que grava"); explicar a diferença entre gravar e dirigir; conduzir para o diagnóstico criativo; fazer follow-up sem pressão; registrar nome, contato e melhor horário.',
+   starters:['Quero um filme institucional para minha marca','Sou médico. Qual pacote faz sentido para mim?','Quanto custa a série de autoridade?'],msgs:[]},
+  {id:'lia',name:'Lia',role:'Diretora Criativa',desc:'Define a ideia central, a linguagem e o tom de cada projeto e aprova o que sai do estúdio.',
+   skill:{name:'Crítica criativa e revisão de marca',how:'Avalia uma peça em cinco passos: primeira impressão em dois segundos, clareza do propósito, hierarquia, consistência com a marca e acessibilidade. Aponta o problema de forma específica, explica o porquê e propõe uma alternativa. Em textos, marca desvios de voz por gravidade com "antes e depois" e sinaliza promessas que a marca não pode fazer.'},
+   ia:{short:'IA: referências e conceitos',how:'Usa IA para gerar referências e moodboards, testar conceitos e versões de roteiro e comparar linguagens antes de gastar uma diária de gravação. Trata o resultado como rascunho: a decisão criativa e a checagem de direitos de imagem e música são dela.'},
+   brief:'Direção criativa em audiovisual: diagnóstico criativo (objetivo, público, posicionamento, tom), ideia central e manifesto de marca, linguagem visual (luz, cor, enquadramento, ritmo, trilha), séries de autoridade para especialistas e clínicas, filmes institucionais, direção de arte, briefing para roteiro, captação e edição, rodadas de aprovação e coerência da marca em todas as peças. O posicionamento da Rua 9 é "Luz que revela": mostrar a marca vista assim, com clareza, em vez de apenas gravá-la.',
+   starters:['Preciso de um conceito para o filme de uma clínica','Avalie este título: "Somos referência em excelência"','Como funciona o diagnóstico criativo?'],
+   msgs:['Conceito aprovado','Moodboard fechado','Revisão de marca feita','Briefing enviado à equipe']},
+  {id:'theo',name:'Theo',role:'Videomaker',desc:'Planeja e executa a captação: câmera, luz e som, e dirige a cena no set.',
+   skill:{name:'Planejamento de captação',how:'Antes de gravar, monta shot list e storyboard, define 16:9 e 9:16 desde a captação e confere alguns quadros dos momentos mais carregados antes de fechar o plano. Não grava avulso sem planejamento.'},
+   ia:{short:'IA: shot list e storyboard',how:'Usa IA para montar shot list e storyboard a partir do roteiro, simular enquadramentos e luz, gerar o checklist de equipamento e transcrever o áudio dos takes durante o set. A direção final no set é humana.'},
+   brief:'Videomaking: câmera (exposição, abertura, ISO, balanço de branco, perfil de cor, lentes e foco), luz (principal, preenchimento e contraluz, luz suave e dura, temperatura de cor, locações como consultórios e escritórios), som (microfone de lapela e shotgun, nível de áudio, ruído de ambiente, gravação de room tone), enquadramento para 16:9 e 9:16 com áreas seguras, direção de pessoas que não são atores (médicos e executivos), logística de diária, backup de cartões, nomeação de arquivos e segurança no set.',
+   starters:['Monte a shot list de uma série com um médico','Que luz usar para gravar em consultório?','Como gravar 16:9 e 9:16 no mesmo dia?'],
+   msgs:['Shot list pronta','Storyboard revisado','Checklist de equipamento ok','Locação confirmada']},
+  {id:'caio',name:'Caio',role:'Editor de Vídeo',desc:'Edita, corrige a cor, mixa o áudio e entrega nos formatos 16:9 e 9:16.',
+   skill:{name:'Montagem e entrega por cena',how:'Fecha cada cena em arquivo próprio com a mesma resolução, taxa de quadros (30 fps, salvo pedido) e codificação, e depois junta tudo. Mudança em uma cena refaz só essa cena. Legendas e cópias menores saem do arquivo final, e a versão completa é renderizada uma vez por pedido, depois de olhar quadros dos momentos mais cheios.'},
+   ia:{short:'IA: legendas e cortes',how:'Usa IA para transcrever e legendar, cortar a partir do texto, limpar ruído de áudio, igualar a cor entre takes e sugerir cortes de ritmo. Revisa tudo à mão antes de entregar.'},
+   brief:'Edição e finalização: estrutura narrativa e ritmo, cortes (J-cut e L-cut), tratamento de entrevistas, correção e gradação de cor, mixagem de áudio (diálogo, trilha, volume final para redes e TV), legendas, formatos e exportação (16:9 e 9:16, reenquadramento, codec e taxa de bits), organização do projeto, proxies, rodadas de revisão, direitos de trilha e entrega em múltiplos formatos.',
+   starters:['Como cortar 8 minutos de entrevista para um Reels?','Qual exportação usar para Instagram?','O começo do meu vídeo está lento. O que fazer?'],
+   msgs:['Corte v2 pronto para revisão','Cor finalizada','Legendas sincronizadas','Entrega 9:16 exportada']},
+  {id:'bia',name:'Bia',role:'Social Media',desc:'Planeja o calendário, escreve roteiros e legendas e transforma cada vídeo em conteúdo para as redes.',
+   skill:{name:'Motor de conteúdo',how:'Aprende a voz da marca antes de escrever, mantém um calendário contínuo já rascunhado para as próximas semanas, reaproveita um vídeo em todos os formatos e deixa tudo pronto para aprovação, sem publicar sozinha. Estrutura cada post em gancho, desenvolvimento, chamada para ação e hashtags.'},
+   ia:{short:'IA: pautas e roteiros',how:'Usa IA para propor pautas, roteiros de Reels, legendas e variações de gancho, transformar um vídeo em cortes e textos para cada rede e analisar desempenho. Sempre na voz da marca e com revisão humana.'},
+   brief:'Social media: Instagram (Reels, carrossel, stories), TikTok, LinkedIn e YouTube Shorts; ganchos nos primeiros segundos; calendário editorial; roteiros curtos; legendas e chamadas para ação; reaproveitamento de um vídeo em vários formatos; métricas (alcance, retenção, salvamentos, compartilhamentos, cliques e leads); relacionamento com a audiência. Em conteúdo de saúde, respeita as regras de publicidade do conselho profissional e nunca promete resultados.',
+   starters:['Monte um calendário de 7 dias para uma clínica','Escreva um Reels de 30 segundos sobre autoridade','Como reaproveitar um vídeo de 5 minutos?'],
+   msgs:['Calendário da semana pronto','Roteiro de Reels aprovado','Legendas escritas','Pauta de segunda fechada']}
 ];
+function cat(id){return CATALOG.filter(function(c){return c.id===id})[0]}
+function defOf(e){return cat(e.key)}
+function skillsHTML(e){
+  var d=defOf(e);if(!d)return '';
+  return '<div class="lbl" style="margin-top:12px">Habilidades</div><div class="skills"><span class="sk">Skill: '+esc(d.skill.name)+'</span><span class="sk ia">'+esc(d.ia.short)+'</span></div>'+
+    '<details class="more"><summary>Como trabalha</summary><p><b>Skill.</b> '+esc(d.skill.how)+'</p><p><b>IA.</b> '+esc(d.ia.how)+'</p></details>';
+}
 var SHIRTS=['#d90429','#6f7bdc','#e0e0d8','#e39a0b','#22a56b','#c46bd1','#3a9bb0','#f08a5d'];
 var HAIRS=['#1a1411','#4a2f1c','#c9a24a','#0f0f12','#8b3a1b'];
 var SKINS=['#f1c9a5','#d9a077','#a96c47','#7a4a2e'];
@@ -476,8 +534,8 @@ function load(){
   }catch(_){return false}
 }
 function seed(){
-  emps=[newEmp(CATALOG[0],{desk:0}),newEmp(CATALOG[4],{desk:1}),newEmp(CATALOG[3],{desk:2}),
-        newEmp(CATALOG[2],{desk:3,status:'gravando'}),newEmp(CATALOG[1],{desk:4,status:'gravando'})];
+  emps=[newEmp(cat('rafa'),{desk:0}),newEmp(cat('lia'),{desk:1}),newEmp(cat('caio'),{desk:2}),
+        newEmp(cat('theo'),{desk:3,status:'gravando'}),newEmp(cat('bia'),{desk:4})];
   logs=[{t:hhmm(),m:'Estúdio aberto com 5 pessoas na equipe.'}];
 }
 
@@ -533,9 +591,9 @@ function drawLabel(c,e,now){
   c.beginPath();c.arc(x+12,y+10,4.5,0,7);c.fillStyle=STATUS[e.target?e.target.eff:'atendendo'].color;c.fill();
   c.fillStyle='#0a0a0a';c.fillText(e.name,x+22,y+14.5);
   e._pill=[x,y,w,h];
-  if(e.bubble&&now<e.bubble.until){
+  if(e.chatting||(e.bubble&&now<e.bubble.until)){
     c.font='600 11px '+FONT;
-    var t=e.bubble.text;if(t.length>34)t=t.slice(0,33)+'…';
+    var t=e.chatting?'Respondendo no chat…':e.bubble.text;if(t.length>34)t=t.slice(0,33)+'…';
     var bw=c.measureText(t).width+18,bx=Math.max(4,Math.min(LW-bw-4,sx-bw/2)),by=y-30;
     rr(c,bx,by,bw,22,8);c.fillStyle='#f5f4f0';c.fill();c.strokeStyle='#d90429';c.lineWidth=1;c.stroke();
     c.beginPath();c.moveTo(sx-4,by+22);c.lineTo(sx,by+28);c.lineTo(sx+4,by+22);c.fillStyle='#f5f4f0';c.fill();
@@ -583,7 +641,7 @@ function tick(){
   $('#clock').textContent=hhmm();
   emps.forEach(function(e){
     var eff=effStatus(e);e.secs[eff]=(e.secs[eff]||0)+1;
-    if(e.moving)return;
+    if(e.moving||e.chatting)return;
     var r=Math.random();
     if(eff==='atendendo'&&e.sit){
       if(isCom(e)){
@@ -593,7 +651,7 @@ function tick(){
           else e.bubble={text:'Lead: '+LEADS[Math.floor(Math.random()*LEADS.length)],until:now+4200};
         }
       }else if(r<.07){
-        e.entregas++;e.bubble={text:ENTREGAS[Math.floor(Math.random()*ENTREGAS.length)],until:now+4200};
+        var dd=defOf(e),lst=(dd&&dd.msgs&&dd.msgs.length)?dd.msgs:ENTREGAS;e.entregas++;e.bubble={text:lst[Math.floor(Math.random()*lst.length)],until:now+4200};
       }
     }else if(eff==='gravando'&&r<.08){
       e.bubble={text:SETMSG[Math.floor(Math.random()*SETMSG.length)],until:now+3600};
@@ -621,11 +679,11 @@ function detailHTML(e){
     '<div class="dh"><span class="av lg" style="background:'+e.shirt+';color:'+(e.shirt==='#e0e0d8'?'#0a0a0a':'#fff')+'">'+esc(e.name.charAt(0).toUpperCase())+'</span><div class="dfields">'+
     '<label class="sr" for="f-name">Nome</label><input type="text" id="f-name" data-field="name" value="'+esc(e.name)+'" maxlength="24">'+
     '<label class="sr" for="f-role">Função</label><input type="text" id="f-role" data-field="role" value="'+esc(e.role)+'" maxlength="40"></div></div>'+
-    '<p class="desc">'+esc(e.desc)+'</p>'+
-    '<div class="lbl">Situação</div><div class="seg" role="group" aria-label="Situação">'+seg+'</div>'+
+    '<p class="desc">'+esc(e.desc)+'</p>'+skillsHTML(e)+
+    '<div class="lbl" style="margin-top:12px">Situação</div><div class="seg" role="group" aria-label="Situação">'+seg+'</div>'+
     '<div class="hours"><label>Entrada<input type="time" data-field="start" value="'+e.start+'"></label><label>Saída<input type="time" data-field="end" value="'+e.end+'"></label></div>'+
     '<p class="hint">Os horários valem quando "Seguir horário de expediente" está ligado.</p>'+
-    '<div class="dact"><span class="mesa">Mesa '+(e.desk+1)+'</span><button class="btn danger" data-act="fire">'+(fireArmed===e.id?'Confirmar demissão':'Demitir')+'</button></div></section>';
+    '<div class="dact"><span class="mesa">Mesa '+(e.desk+1)+'</span><button class="btn ghost" data-act="chat">Conversar</button><button class="btn danger" data-act="fire">'+(fireArmed===e.id?'Confirmar demissão':'Demitir')+'</button></div></section>';
 }
 function renderTeam(){
   var el=$('#p-team'),sel=emps.filter(function(e){return e.id===selId})[0],h='';
@@ -636,7 +694,7 @@ function renderTeam(){
   var full=emps.length>=DESKS.length;
   h+='<h2 class="sec">02 / Contratar</h2>';
   CATALOG.filter(function(c){return !emps.some(function(e){return e.key===c.id})}).forEach(function(c){
-    h+='<div class="card"><div><b>'+esc(c.name)+'</b> <span class="r">'+esc(c.role)+'</span></div><p>'+esc(c.desc)+'</p><button class="btn" data-act="hire" data-key="'+c.id+'"'+(full?' disabled':'')+'>'+(full?'Sem mesa':'Contratar')+'</button></div>';
+    h+='<div class="card"><div><b>'+esc(c.name)+'</b> <span class="r">'+esc(c.role)+'</span></div><p>'+esc(c.desc)+'<br><span class="r">Skill: '+esc(c.skill.name)+' · '+esc(c.ia.short)+'</span></p><button class="btn" data-act="hire" data-key="'+c.id+'"'+(full?' disabled':'')+'>'+(full?'Sem mesa':'Contratar')+'</button></div>';
   });
   h+='<div class="lbl" style="margin-top:14px">Cargo personalizado</div><div class="custom"><label class="sr" for="c-name">Nome</label><input type="text" id="c-name" placeholder="Nome" maxlength="24"><label class="sr" for="c-role">Função</label><input type="text" id="c-role" placeholder="Função" maxlength="40"><button class="btn ghost" data-act="hire-custom"'+(full?' disabled':'')+'>Contratar</button></div>';
   var keep=el.scrollTop;el.innerHTML=h;el.scrollTop=keep;
@@ -656,10 +714,11 @@ function renderReport(){
 }
 function renderAll(){renderTeam();renderLog();renderReport()}
 function showTab(id){
-  ['team','log','rep'].forEach(function(k){
+  ['team','log','rep','chat'].forEach(function(k){
     var on=k===id;$('#t-'+k).setAttribute('aria-selected',on);$('#p-'+k).hidden=!on;
   });
   if(id==='rep')renderReport();
+  if(id==='chat')renderChat();
 }
 function select(id){selId=id;fireArmed=null;showTab('team');renderTeam()}
 function hire(def){
@@ -675,6 +734,10 @@ $('.side').addEventListener('click',function(ev){
   var b=ev.target.closest('[data-act]');if(!b)return;
   var act=b.dataset.act,e=emps.filter(function(x){return x.id===selId})[0];
   if(act==='select')select(b.dataset.id);
+  else if(act==='chat'&&e){chatId=e.id;showTab('chat')}
+  else if(act==='who'){if(!chatBusy){chatId=b.dataset.id;chatErr='';renderChat()}}
+  else if(act==='sug'){sendChat(b.dataset.t)}
+  else if(act==='stop'){if(chatCtl)chatCtl.abort()}
   else if(act==='status'&&e){e.status=b.dataset.s;log(e.name+' agora está: '+STATUS[e.status].label+'.');renderTeam()}
   else if(act==='hire'){var d=CATALOG.filter(function(c){return c.id===b.dataset.key})[0];if(d)hire(d)}
   else if(act==='hire-custom'){
@@ -706,6 +769,82 @@ $('.tabs').addEventListener('click',function(ev){
 });
 $('#auto').addEventListener('change',function(){autoHours=this.checked;save();renderTeam()});
 
+/* ---------- conversa com o funcionário (Claude, na conta de quem abre a página) ---------- */
+var chats={},chatId=null,chatBusy=false,chatCtl=null,chatErr='',sampleFn;
+function rules(e){
+  var d=defOf(e);
+  var L=[
+    'Você é '+e.name+', '+e.role+' da Rua 9 (R9 / Estúdio Independente), uma produtora audiovisual e de direção criativa. Você conversa em português do Brasil, por chat, com pessoas interessadas no estúdio. Você é uma IA assistente da equipe: se perguntarem, diga isso com naturalidade.',
+    'Sobre a Rua 9 (use apenas isto, sem inventar nada além):',
+    '- Serviços: filmes institucionais e manifestos de marca; séries de autoridade para executivos e especialistas, inclusive clínicas; coberturas de eventos com criativos de performance.',
+    '- Processo: Descobrir (diagnóstico criativo), Criar e Produzir (direção, roteiro e captação com câmera, luz e som), com montagem e finalização. Entrega em 16:9 e 9:16.',
+    '- Pacotes: Essencial R$ 1.800; Performance R$ 3.000; Autoridade Total R$ 3.500. Projetos institucionais sob medida têm o valor definido depois do diagnóstico.',
+    '- A Rua 9 não é indicada para gravações avulsas sem planejamento e não promete retorno comercial nem vendas garantidas. Diga isso com transparência quando fizer sentido.',
+    '- Já teve trabalho exibido na TV aberta (Band).',
+    'Você NÃO sabe o que cada pacote inclui em detalhe (número de vídeos, diárias, prazos). Se perguntarem, diga que o diagnóstico define o escopo exato e ofereça agendá-lo. Nunca invente prazos, clientes, cases, descontos ou condições de pagamento.'
+  ];
+  if(d){
+    L.push('Sua função é '+e.role+'. Você entende tudo sobre ela e responde como especialista de verdade. Conhecimento da sua área: '+d.brief);
+    L.push('Sua skill, o método que você sempre aplica: '+d.skill.name+'. '+d.skill.how);
+    L.push('Como você usa IA no trabalho: '+d.ia.how+' Seja honesto: a IA acelera, mas você revisa tudo.');
+  }else L.push('Seu trabalho: '+e.desc);
+  if(isCom(e)){
+    L.push('Seu objetivo: entender o que a pessoa quer e levá-la a agendar um diagnóstico criativo. Tom amigável e persuasivo: caloroso, confiante, frases curtas, com um toque cinematográfico discreto (luz, revelar). Persuada com clareza, benefício e um próximo passo fácil; nunca com pressão, urgência falsa ou promessa de resultado.');
+    L.push('Faça no máximo uma pergunta por vez. Responda em 2 a 4 frases, sem listas longas e sem emojis. Diga os preços quando perguntarem ou quando ajudar a decidir, e indique o pacote que parece mais adequado ao que a pessoa descreveu, sem inventar o que ele inclui. Quando houver interesse, peça o nome e o melhor dia e horário e diga que a equipe confirma o agendamento.');
+  }else{
+    L.push('Fale como especialista da sua função, de forma prática e concreta, com exemplos aplicados ao trabalho da Rua 9 (clínicas, especialistas, marcas). Quando a pessoa pedir uma entrega (calendário, shot list, roteiro, crítica, plano de corte), entregue o material pronto, organizado e enxuto. Nos demais casos responda em 2 a 4 frases. Se faltar informação essencial, faça uma pergunta objetiva antes. Tom amigável, sem emojis. Você não fala de preços nem faz propostas: encaminhe ao Rafa, do Atendimento Comercial. Assuntos de outra área, indique o colega: Lia (direção criativa), Theo (videomaker), Caio (edição), Bia (redes sociais).');
+  }
+  return L.join('\n');
+}
+function greet(e){
+  return isCom(e)?'Oi, tudo bem? Aqui é '+e.name+', da Rua 9. Me conta: o que você quer revelar sobre a sua marca ou o seu trabalho?':'Oi! Aqui é '+e.name+', '+e.role+' da Rua 9. Em que posso ajudar?';
+}
+function turnsFor(e){if(!chats[e.id])chats[e.id]=[{role:'assistant',content:greet(e)}];return chats[e.id]}
+function chatEmp(){return emps.filter(function(x){return x.id===chatId})[0]||emps.filter(isCom)[0]||emps[0]}
+function renderChat(){
+  var el=$('#p-chat'),e=chatEmp();
+  if(!e){el.innerHTML='<p class="empty">Contrate alguém para conversar.</p>';return}
+  var prev=$('#chat-in'),pv=prev?prev.value:'';
+  chatId=e.id;var t=turnsFor(e),off=sampleFn===null,d=defOf(e);
+  var who=emps.map(function(x){return '<button data-act="who" data-id="'+x.id+'" class="'+(x.id===e.id?'on':'')+'" aria-pressed="'+(x.id===e.id)+'"><span class="av" style="background:'+x.shirt+';color:'+(x.shirt==='#e0e0d8'?'#0a0a0a':'#fff')+'">'+esc(x.name.charAt(0).toUpperCase())+'</span>'+esc(x.name)+'</button>'}).join('');
+  var msgs=t.map(function(m){return '<div class="m '+(m.role==='user'?'me':'bot')+'">'+esc(m.content)+'</div>'}).join('');
+  if(chatBusy)msgs+='<div class="m bot wait" id="live">Escrevendo…</div>';
+  var starters=d?d.starters:['O que você faz na Rua 9?'];
+  var sugs=t.length===1&&!chatBusy?'<div class="sugs">'+starters.map(function(s){return '<button type="button" data-act="sug" data-t="'+esc(s)+'">'+esc(s)+'</button>'}).join('')+'</div>':'';
+  var chips=d?'<div class="skills"><span class="sk">Skill: '+esc(d.skill.name)+'</span><span class="sk ia">'+esc(d.ia.short)+'</span></div>':'';
+  el.innerHTML='<div class="who" role="group" aria-label="Com quem conversar">'+who+'</div>'+
+    '<div class="chead"><div><b>'+esc(e.name)+'</b><small>'+esc(e.role)+'</small></div></div>'+chips+
+    '<div class="msgs" id="msgs" role="log" aria-live="polite">'+msgs+'</div>'+sugs+
+    '<form id="chat-form" class="cform"><label class="sr" for="chat-in">Mensagem</label><input type="text" id="chat-in" placeholder="Escreva sua mensagem" maxlength="500" autocomplete="off">'+
+    (chatBusy?'<button class="btn ghost" type="button" data-act="stop">Parar</button>':'<button class="btn" type="submit">Enviar</button>')+'</form>'+
+    (chatErr?'<p class="cerr" role="alert">'+esc(chatErr)+'</p>':'')+
+    (off?'<p class="fine">Você pode escrever, mas o chat só responde quando a página é aberta pelo link do Claude. No GitHub Pages ele precisa de um servidor intermediário, que é a próxima etapa.</p>':'<p class="fine">Simulação de atendimento. As respostas usam o que está no site da Rua 9 e nada é enviado a clientes de verdade.</p>');
+  var m=$('#msgs');m.scrollTop=m.scrollHeight;
+  var inp=$('#chat-in');inp.value=pv;
+  if(!$('#p-chat').hidden&&(!chatBusy||pv)&&(document.activeElement===document.body||document.activeElement===prev))inp.focus();
+}
+function sendChat(text){
+  text=(text||'').trim();var e=chatEmp();
+  if(!e||chatBusy||!text)return;
+  if(!sampleFn){chatErr='O chat só responde quando a página é aberta pelo link do Claude.';renderChat();return}
+  var t=turnsFor(e);t.push({role:'user',content:text});
+  chatBusy=true;chatErr='';e.chatting=true;chatCtl=new AbortController();renderChat();
+  var live=$('#live'),input=[{role:'user',content:rules(e)}].concat(t.slice(-20));
+  sampleFn(input,{cache:false,modelTier:isCom(e)?'quick':'default',signal:chatCtl.signal,onText:function(u){
+    if(live){live.classList.remove('wait');live.textContent=u.text;var m=$('#msgs');if(m)m.scrollTop=m.scrollHeight}
+  }}).then(function(r){t.push({role:'assistant',content:r.text})}).catch(function(err){
+    err=err||{};
+    if(err.text)t.push({role:'assistant',content:err.text});
+    if(err.code==='cancelled')return;
+    chatErr=err.code==='not_granted'?'Para conversar, permita o uso do Claude quando o aviso aparecer e envie de novo.':
+      err.code==='rate_limited'?'Muitas mensagens seguidas. Espere um pouco e tente de novo.':
+      err.code==='sampling_disabled'?'O Claude não está disponível para esta conta.':'Não consegui responder agora. Envie a mensagem de novo.';
+  }).then(function(){chatBusy=false;e.chatting=false;chatCtl=null;renderChat()});
+}
+$('.side').addEventListener('submit',function(ev){
+  ev.preventDefault();var i=$('#chat-in');if(i){var v=i.value;i.value='';sendChat(v)}
+});
+
 /* clique no estúdio */
 function toLogical(ev){var r=cv.getBoundingClientRect();return [(ev.clientX-r.left)/r.width*LW,(ev.clientY-r.top)/r.height*LH]}
 function pick(pt){
@@ -729,6 +868,9 @@ fit();
 if(window.ResizeObserver)new ResizeObserver(fit).observe(stage);else window.addEventListener('resize',fit);
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fit);
 renderAll();tick();
+if(window.claude&&typeof claude.use==='function'){
+  claude.use('sample').then(function(s){sampleFn=s||null;if(!$('#p-chat').hidden&&!chatBusy)renderChat()}).catch(function(){sampleFn=null});
+}else sampleFn=null;
 setInterval(tick,1000);
 requestAnimationFrame(frame);
 })();
